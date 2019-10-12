@@ -1,0 +1,95 @@
+---
+title: "00_urban-microbes-data-cleaning-&-exploration"
+author: "Amanda Looze"
+date: "October 12, 2019"
+output: html_document
+---
+
+```{r install-packages-library results='hide', echo = FALSE, include=FALSE}
+# install.packages("dplyr")
+# install.packages("lubridate")
+# install.packages("psych")
+library(dplyr) # mutate function
+library(lubridate) # as.POSIX function
+library(ggplot2)
+library(psych)
+options(stringsAsFactors = FALSE) # makes dates strings
+```
+
+```{r import-fungal-site-inventory, echo = FALSE}
+fungal_inventory <- read.csv("Fungal_site_inventory.csv", skip = 1, header = TRUE, col.names = c("Site_number", "prop_imp_surf", "Zone_code", "Zone_name", "my_land_cover_classification", "#_fungi_colonies_present", "total_unique", "total_overlap"))
+
+head(fungal_inventory)
+
+str(fungal_inventory)
+```
+
+```{r format-data, echo = FALSE}
+fungal_inventory <- fungal_inventory %>% mutate(Site_number = as.factor(Site_number), Zone_code = as.factor(Zone_code), Zone_name = as.factor(Zone_name), my_land_cover_classification = as.factor(my_land_cover_classification))
+
+head(fungal_inventory)
+
+str(fungal_inventory)
+```
+
+```{r total-unique-vs-site-number, echo=FALSE}
+#bar graph
+
+i = 1000:1036 #gives values for x labels to show in plot
+
+ggplot(data = fungal_inventory, mapping = aes(x = Site_number, y = total_unique, fill = total_unique)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(breaks=i) + #makes all x labels show
+  ylab("Total Unique") +
+  xlab("Site Number") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 50, hjust = 1)) + #angles x labels
+  theme(legend.position = "top")
+
+```
+
+```{r total-unique-vs-prop-imp-surf, echo=FALSE}
+#scatter plot
+
+ggplot(data = fungal_inventory, mapping = aes(x = prop_imp_surf, y = total_unique, color = prop_imp_surf)) +
+  geom_jitter() +
+  ylab("Total Unique") +
+  xlab("Proportion of Impervious Surface") + 
+  theme_bw() 
+
+```
+
+```{r total-unique-vs-my-land-cover-classification, echo=FALSE}
+#bar graph with error plots
+
+# mean_low <- fungal_inventory %>%
+#   group_by(my_land_cover_classification == "residential_low") %>% 
+#   summarize(mean(total_unique, na.rm = TRUE))
+# 
+# sum <- fungal_inventory %>% 
+#   group_by(my_land_cover_classification) %>% 
+#   summarize(sum(total_unique, na.rm = TRUE))
+# 
+# number <- fungal_inventory %>% 
+#   group_by(my_land_cover_classification) %>% 
+#   summarize(n())
+# 
+# sd <- fungal_inventory %>% 
+#   group_by(my_land_cover_classification) %>% 
+#   summarize(sd = sd(total_unique))
+# 
+# se <- fungal_inventory %>% 
+#   group_by(my_land_cover_classification) %>% 
+#   summarize(SE = sd(total_unique)/sqrt(n()))
+
+
+ggplot(fungal_inventory, mapping = aes(x = my_land_cover_classification, y = total_unique, fill = my_land_cover_classification)) +
+  geom_bar(stat = "summary", fun.y = "mean") + #takes avg of desired info
+  # geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd, width = 0.2)) +
+  ylab("Total Unique") +
+  xlab("Land Cover Classification") +
+  theme_bw() +
+  theme(legend.position = "none") 
+
+```
+
