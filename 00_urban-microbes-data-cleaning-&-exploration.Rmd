@@ -12,7 +12,7 @@ output: html_document
 library(dplyr) # mutate function
 library(lubridate) # as.POSIX function
 library(ggplot2)
-library(psych)
+# library(psych)
 options(stringsAsFactors = FALSE) # makes dates strings
 ```
 
